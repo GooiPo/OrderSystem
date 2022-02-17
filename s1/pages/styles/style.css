@@ -1,0 +1,103 @@
+
+body {
+    background-color: beige;
+}
+
+.nav {
+    display: flex;
+    height: 5vw;
+    background-color: burlywood;
+} 
+
+#bar {
+    margin-top: 1vw;
+    font-size: 2vw;
+}
+
+.nav a:hover {
+    border-bottom-style: solid;
+    border-bottom-width: 0.5vw;
+}
+
+a {
+    text-decoration-line: none;
+}
+
+
+#index {
+    width: 55vw;
+    height: 30vw;
+    padding-top: 5vw;
+    padding-left: 20vw;
+    padding-right: 20vw;
+    font-size: 2vw;
+    text-align: center;
+}
+
+.part {
+    text-align: center;
+    height: auto;
+    width: auto;
+    font-size: 2vw;
+}
+
+
+
+.each {
+    padding-left: 35vw;
+    width:auto; 
+    height:auto; 
+    font-size: 1.5vw;
+    padding-top: 1vw;
+}
+
+#logIn {
+    font-size: 4vw;
+}
+
+.userType {
+    font-size: 2.5vw;
+    margin-bottom: 2vw;
+} 
+
+
+#myPur {
+    font-size: 2vw;
+    height: auto;
+    padding-bottom: 5vw;
+    padding-left: 43vw;
+}
+
+#t2 {
+    padding-bottom: 5vw;
+    padding-left: 40vw;
+}
+
+
+#items {
+    padding-left: 2.5vw;
+    font-size: 1.5vw;
+    width:auto;
+    height:auto;
+}
+
+#orderInfo {
+    padding-top: 5vw;
+    padding-left: 42vw;
+    font-size: 1.5vw;
+    text-align: left;
+    padding-bottom: 5vw;
+
+}
+
+#idAlert {
+    padding-bottom: 5vw;
+}
+
+
+#customerMenu {
+    padding-bottom: 5vw;
+    padding-left: 42vw;
+}
+
+

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>customer</title>
+    <link rel="stylesheet" type="text/css" href="./styles/style.css">
+    </head>
+<body onload="storage()">
+
+
+    <div class="nav">
+        <a href="./index.html" id="bar">Log In</a>
+    </div>
+
+
+    <div class=part>
+        <h3>Search Order</h3>
+        <label for="post">Order ID
+            <input type="number" id="ID" name="id">
+        </label>
+
+        <br>
+
+        <button id="checkButton">Submit</button><br>
+        
+
+        <!-- <br><br>
+        <h3>Make order</h3>
+        <label for="usrname">username:
+        <input type="text" id="username" name="username"></label><br>
+        <button id="makeButton">Submit</button><br><br>
+        <div id="idAlert"></div> -->
+    </div>
+
+    <div id="orderInfo" ></div>
+
+    <div class=part>
+        <div class="each" id="customerMenu"></div>
+    </div>
+
+    <div class=part>
+        <h3>CheckOut</h3>
+        <label for="usrname">username:
+        <input type="text" id="username" name="username"></label><br>
+        <button id="makeButton">Submit</button><br><br>
+        <div id="idAlert"></div>
+    </div>
+
+    <div id="myPur">
+        <h3>Shopping Cart</h3>
+        <div class="each" id="items"></div>
+    </div>
+
+
+    <script type = "text/javascript">
+        
+        function storage(){
+            localStorage.setItem("menu", "[]");
+            localStorage.setItem("myList", "[]");
+            load();
+        }
+
+        // Search order
+        function searchOrder() {
+
+            http = new XMLHttpRequest();
+
+            var params = 'id=' + document.getElementById("ID").value;
+            var url = "/Order/ID?" + params; 
+            
+            http.open("GET", url, true);
+
+            http.onreadystatechange = function() {
+
+                if(this.readyState == 4 && this.status == 200) {
+                    myObj = JSON.parse(this.responseText);
+                    console.log(myObj);
+
+                    if (myObj.length > 0){
+                        var table = "<table border='1' id='menu-table' >"
+                        table += "<tr> <td> username </td> <td> Ready to go </td></tr>"
+                        table += "<tr> <td> " + myObj[0].username + "</td> <td>" + JSON.stringify(myObj[0].isReady == 1) + "</td></tr>";
+
+                        if (myObj[0].isReady == 0){
+                            table += "<td><button class='post' onclick='deleteOrder("+myObj[0].orderID+")'>Delete</button>" +"</td>";
+                        }
+
+                        table += "</tr></table>"
+                        document.getElementById("orderInfo").innerHTML = table;
+                        foodOrdered = JSON.parse(myObj[0].food);
+                        drinkMenu = JSON.parse(localStorage.getItem("menu"));
+
+                        for(x in foodOrdered) {
+                            let p = drinkMenu.findIndex(n=>n.drinkID === foodOrdered[x]);
+                            console.log(p);
+                            document.getElementById("orderInfo").innerHTML += "<p>" + drinkMenu[p].name + "  $" + drinkMenu[p].price  + "</p>";
+                        }
+                        checkready(document.getElementById("ID").value);
+                    }
+
+                    else {
+                        alert("Not found this ID")
+                    }
+                }
+            };
+            http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            http.send();
+        }
+
+
+        // add item to cart
+        function addItem(orderId) {
+            if (localStorage.getItem("myList") === null) {
+                localStorage.setItem("myList", "[]")
+            }
+
+            let cart = JSON.parse(localStorage.getItem("myList"));
+            let newItem = parseInt(orderId);
+            cart.push(newItem);
+            localStorage.setItem("myList", JSON.stringify(cart));
+
+            showCart();
+        }
+
+        
+        // send order to server
+        function send() {
+            var http = new XMLHttpRequest();
+            var params = "username=" + document.getElementById("username").value +"&"+ "food=" + localStorage.getItem("myList");
+            http.open("POST", "/Order", true);
+
+            http.addEventListener("load",  () => {
+                if(http.readyState == 4 && http.status == 200) {
+                    myObj = JSON.parse(http.response); 
+                    alert("New order");
+                    document.getElementById("idAlert").innerHTML = "<p>your order created successfully! ID is: " + myObj.insertId + " </p>";
+                    setTimeout(checkready(myObj.insertId), 3000);
+                }
+
+                else{
+                    alert("Send failed")
+                }
+            });
+
+            http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            http.send(params);
+            
+        }
+
+        // delete order by using id
+        function deleteOrder(id) {
+            var http = new XMLHttpRequest();
+            var params = 'id=' + JSON.stringify(id);
+
+            http.open('DELETE', '/Order/?'+params, true);
+
+            httpRequest.addEventListener("load",  () => {
+                    if(http.readyState == 4 && http.status == 200) {
+                        alert("Success!");
+                        document.getElementById("idAlert").innerHTML = "<p>order deleted </p>";
+                        document.getElementById("orderInfo").innerHTML = "<p>order deleted</p>";
+                    }
+                    else{
+                        alert("Fail to delete !")
+                    }
+            });
+            
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            http.send();
+        }
+
+        // load menu
+        function load() {
+            http = new XMLHttpRequest();
+            http.open("GET", '/Menu', true);
+
+            http.onreadystatechange = function() {
+                if(this.readyState == 4 && this.status == 200) {
+                    myObj = JSON.parse(this.responseText);
+                    localStorage.setItem('menu',JSON.stringify(myObj));
+                    var table = "<table border='1' id='menu-table' >"
+                    table += "<tr> <td>Food name</td> <td>Price</td> <td>Add</td> </tr>";
+                    for(x in myObj) {
+                        table += "<tr>  <td>" + myObj[x].name + "</td><td> "+ myObj[x].price + "</td><td>" + "<button class='menuButton' id="+ myObj[x].drinkID+ " onclick='addItem("+ myObj[x].drinkID+ ")'>Add</button>" +"</td></tr>";
+                        console.log(myObj[x].drinkID);
+                    }
+                    table += "</table>"
+                    document.getElementById("customerMenu").innerHTML = table;
+                }
+            };
+
+            http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            http.send();
+        }
+
+
+        function showCart() {
+            let foodlist = JSON.parse(localStorage.getItem("menu"));
+            
+            if (localStorage.getItem("myList") === null)
+                localStorage.setItem("myList", "[]")
+
+            let c = document.getElementById("items")
+
+            c.querySelectorAll('*').forEach(n => n.remove());
+
+            let cart = JSON.parse(localStorage.getItem("myList"));
+
+            for (let el of cart) {
+                let p = foodlist.findIndex(n=>n.drinkID === parseInt(el))
+                let d = document.createElement("div")
+                d.innerHTML = foodlist[p].name + "  - " + foodlist[p].price + " &nbsp&nbsp";
+                d.innerHTML +="<button>Delete</button>";  
+
+                d.addEventListener('click',deleteItem);     
+                c.appendChild(d)
+            } 
+        }
+
+        // delete in cart
+        function deleteItem() {
+            let p = this.parentNode
+            console.log(p)
+            console.log(this)
+            let i = 0
+            while (p.children[i] != this)
+                i++;
+            console.log(i)
+            p.removeChild(this)
+            let cart = JSON.parse(localStorage.getItem("myList"));
+            
+            cart.splice(i,1);
+            localStorage.setItem("myList", JSON.stringify(cart)); 
+            showCart();
+        }
+
+
+        document.getElementById("makeButton").addEventListener("click", send);   
+
+        document.getElementById("checkButton").addEventListener("click", searchOrder);
+        
+    </script>
+
+</body>
+
+</html>

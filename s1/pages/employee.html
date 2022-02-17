@@ -1,0 +1,233 @@
+
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>employee</title>
+    <link rel="stylesheet" type="text/css" href="./styles/style.css">
+
+</head>
+
+<body onload="init()">
+
+    <div class="nav">
+            <a href="./index.html" id="bar">Log In</a>
+    </div>
+
+
+    <div class=part>
+        <h3>Unready</h3>
+
+        <div class="each" id="t1" style ='width:auto; height:auto; font-size: 1.2vw;'></div><br><br>
+    
+        <h3>Ready</h3>
+
+        <div class="each" id="t3" style ='width:auto; height:auto; font-size: 1.2vw;'></div><br><br>
+    </div>
+
+
+
+    <div class=part>
+        <label for="name">Drink name:
+        <input type="text" id="name" name="foodname"></label><br>
+        <label for="price">Price:
+        <input type="number" id="price" name="price"></label><br>
+        <button id="b2">Submit</button><br>
+    </div>
+
+    <div class=part>
+        <div class="each" id="t2" ></div>
+    </div>
+
+
+
+
+
+    <script type = "text/javascript"> 
+        
+
+        function load() {
+            http = new XMLHttpRequest();
+            http.open("GET", "/Order/unready", true);
+
+            http.onreadystatechange = function() {
+                if(this.readyState == 4 && this.status == 200) {
+                    myObj = JSON.parse(this.responseText);
+                    var table = "<table border='1' id='menu-table' >";
+                    table += "<tr> <td> orderID </td><td> username </td> <td>food ordered</td><td> time</td><td> IsReady to Pick up</td></tr>";
+                    
+                    for(x in myObj) {
+                        table += "<tr> <td>" + myObj[x].orderID + "</td>" ;
+
+                        table += "<td> " + myObj[x].username + "</td> <td>" + myObj[x].food + "</td><td> "+ myObj[x].time + "</td><td>";
+
+                        table += JSON.stringify(myObj[x].isReady == 1) + "</td><td>";
+                        
+                        table += "<button class='post' onclick='deletepost("+myObj[x].orderID+")'>Delete</button>" +"</td>";
+
+                        table += "<td><button class='ready' onclick='readypost("+myObj[x].orderID+")'>Ready</button>" +"</td></tr>";
+                    }
+                    table += "</table>"
+
+                    document.getElementById("t1").innerHTML = table;
+                }
+            };
+    
+            http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            http.send();
+        }
+
+
+        function loadReady() {
+            http = new XMLHttpRequest();
+            http.open("GET", "/Order/ready", true);
+
+            http.onreadystatechange = function() {
+                if(this.readyState == 4 && this.status == 200) {
+
+                    myObj = JSON.parse(this.responseText);
+                    var table = "<table border='1' id='menu-table' >";
+                        table += "<tr> <td> orderID </td><td> username </td> <td>food ordered</td><td> time</td><td> IsReady to Pick up</td></tr>";
+                        
+                        for(x in myObj) {
+                            table += "<tr> <td>" + myObj[x].orderID + "</td>";
+                            table += "<td> " + myObj[x].username + "</td> <td>" + myObj[x].food + "</td><td> "+ myObj[x].time + "</td><td>";
+                            table += JSON.stringify(myObj[x].isReady == 1) + "</td><td>"
+                            table += "<button class='post' onclick='deletepost("+myObj[x].orderID+")'>Delete</button>" +"</td></tr>";
+                        }
+                        table += "</table>"
+                        document.getElementById("t3").innerHTML = table;
+                }
+            };
+
+            http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            http.send();
+        }
+
+
+
+        // menu
+
+        function sendmenu() {
+            var http = new XMLHttpRequest();
+
+            
+            var params = 'name=' + document.getElementById("name").value +"&"+ "price=" + document.getElementById("price").value;
+
+            http.open('POST', '/Menu', true);
+
+            http.addEventListener("load",  () => {
+                    if(http.readyState == 4 && http.status == 200) {
+                        alert("Success!");}
+                    else{
+                        alert("fail to create !")
+                    }
+            });
+
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            http.send(params);
+            loadmenu();
+        }
+
+
+        function loadmenu() {
+            http = new XMLHttpRequest();
+            http.onreadystatechange = function() {
+                if(this.readyState == 4 && this.status == 200) {
+                    myObj = JSON.parse(this.responseText);
+                    var table = "<table border='1' id='menu-table' >"
+                    table += "<tr> <td> drinkID </td> <td>  food name   </td><td>   price   </td>   <td></td>   </tr>";
+                    for(x in myObj) {
+                        table += "<tr> <td> " + myObj[x].drinkID + "</td> <td>" + myObj[x].name + "</td><td> "+ myObj[x].price + "</td><td>";
+                        table += "<button class='menu' onclick='deleteMenu("+myObj[x].drinkID+")'>Delete</button>" +"</td></tr>";
+                    }
+                    table += "</table>"
+                    document.getElementById("t2").innerHTML = table;
+                }
+            };
+            var url = "/Menu"; 
+            http.open("GET", url, true);
+            http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            http.send();
+        }
+
+        function deletepost(id) {
+            var http = new XMLHttpRequest();
+            var params = 'id=' + JSON.stringify(id);
+            var url = '/Order/?'+params;
+            http.open('DELETE', url, true);
+
+            http.addEventListener("load",  () => {
+                    if(http.readyState == 4 && http.status == 200) {
+                        alert("Success!");
+                        load();
+                        loadReady();
+                    }
+                    else{
+                        alert("fail to delete !")
+                    }
+            });
+    
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            http.send();
+        }
+
+
+        function readypost(id) {
+            var http = new XMLHttpRequest();
+            http.addEventListener("load",  () => {
+                    if(http.readyState == 4 && http.status == 200) {
+                        alert("Success!");
+                        load();
+                        loadReady();
+                    }
+                    else{
+                        alert("fail!")
+                    }
+            });
+            var params = 'id=' + JSON.stringify(id);
+            var url = '/Order/OK/?'+params;
+            console.log(params);
+            http.open('PUT', url, true);
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            http.send();
+        }
+
+
+        function deleteMenu(id) {
+            var http = new XMLHttpRequest();
+            var params = 'id=' + JSON.stringify(id);
+            var url = '/Menu/?'+params;
+
+            http.open('DELETE', url, true);
+
+            http.addEventListener("load",  () => {
+                    if(http.readyState == 4 && http.status == 200) {
+                        alert("Success!");
+                        loadmenu();}
+                    else{
+                        alert("fail to delete !")
+                    }
+            });
+
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            http.send();
+        }
+
+        
+  
+        load();
+
+        loadReady();
+
+        document.getElementById("b2").addEventListener("click", sendmenu);   
+
+        loadmenu();
+        
+    </script>
+
+</body>
+
+</html>
